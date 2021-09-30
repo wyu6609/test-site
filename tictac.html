@@ -1,0 +1,355 @@
+<html> 
+  <head>
+  <title>tictactoe</title>
+    <style>
+      body {
+  background-color: #f0d41f;
+  font-family: "Ubuntu", sans-serif;
+  font-size: 20pt;
+}
+
+
+.startgame {
+  border:5px solid black;
+  position:absolute;
+  background-color: rgba(240, 212, 31, 0.9);
+  z-index: 99 !important;
+  width:350px;
+  top:260px;
+  left:50%;
+  transform:translate(-50%,-50%);
+  display:none;
+}
+
+h3 {
+  padding-top: 30px;
+  font-weight: bold;
+  margin: 10px;
+}
+
+h3 .btn {
+  border: 3px solid black;
+  color: black;
+  font-size: 16pt;
+  margin: 10px;
+  margin-bottom: 30px;
+}
+
+.title {
+  font-size: 45pt;
+}
+
+h3 .btn:hover {
+  border: 3px solid purple;
+  background-color: purple;
+  color: #f0d41f;
+}
+
+.row .btn {
+  background-color: #f0d41f;
+  font-size: 36pt;
+  color: #f0d41f;
+  letter-spacing: 4px;
+  width: 7.2vw;
+  height: 7.2vw;
+}
+
+.row .btn:hover {
+  color: #f0d41f;
+}
+
+table {
+  margin: auto;
+  align: center;
+  border-color: black;
+}
+
+.v {
+  border-left: 7px solid black;
+  border-right: 7px solid black;
+}
+.h {
+  border-top: 7px solid black;
+  border-bottom: 7px solid black;
+}
+.tic {
+}
+
+
+span{
+  margin-top:20px;
+}
+
+i,h2{
+  display:inline;
+  padding:10px;
+  margin:10px;
+}
+
+.endgame {
+  border:5px solid black;
+  width:260px;
+  top:190px;
+  background-color: rgba(240, 212, 31, 0.9);
+  position:absolute;
+  left:50%;
+  margin-left:-130px;
+}
+
+.replay{
+  font-size:25pt;
+  border: 3px solid black;
+  color: black;
+  font-size: 16pt;
+  margin: 10px;
+  margin-bottom: 30px;
+}
+
+.replay:hover{
+  border: 3px solid purple;
+  background-color: purple;
+  color: #f0d41f;
+}
+    </style>
+  </head>
+  <body>
+  <div class="container text-center">
+  <div class="startgame">
+
+    <h3>Pick your marker
+      </br>
+  <a class="btn " id="turnx">X</a> 
+  <a class="btn " id="turno">0</a>
+    </h3>
+
+  </div>
+  <div class="game">
+    <h3 class="title">TIC-TAC-TOE</h3>
+
+
+    <div class="row">
+      <div class="col-md-3">
+      </div>
+      <div class="col-md-6">
+        <table>
+          <tr>
+            <td><a class="btn tic" id="0">#</a></td>
+            <td class="v"><a class="btn tic" id="1">#</a></td>
+            <td><a class="btn tic" id="2">#</a></td>
+          </tr>
+          <tr>
+            <td class="h"><a class="btn tic" id="3">#</a></td>
+            <td class="h v"><a class="btn tic" id="4">#</a></td>
+            <td class="h"><a class="btn tic" id="5">#</a></td>
+
+          </tr>
+          <tr>
+
+            <td><a class="btn tic" id="6">#</a></td>
+            <td class="v"><a class="btn tic" id="7">#</a></td>
+            <td><a class="btn tic" id="8">#</a></td>
+
+          </tr>
+        </table>
+      </div>
+      <div class="col-md-3">
+      </div>
+    </div>
+  </div>
+<div class="score">
+  <span class="results">
+    <i class="fa fa-user person" aria-hidden="true"></i>
+    <h2 class="human">0</h2>
+    <i class="fa fa-laptop" aria-hidden="true"></i>
+    <h2 class="computer">0</h2>
+    </span>
+  </div>
+  <div class="endgame">
+    <h3 class="text"></h3>
+    <a class="btn replay">Play Again</a>
+  </div>
+</div>
+  <script>
+    $(document).ready(function() {
+  //default player's turn to X
+  var turn = "X";
+  var turnWon=0;
+  //array stores values will checklater for a winner
+  var turns=[0,1,2,3,4,5,6,7,8]
+  //default computer's turn
+  var computer = "O";
+  var computerWon=0;
+  //keeps track of comuters turn so no loop
+  var fc=0;
+  var checkDraw=[];
+  //Change player turn to x and computer to o
+  $("#turnx").click(function() {
+    $(".startgame").css("display","none")
+    turn = "X";
+    computer = "O";
+    reset();
+  });
+
+  //Change player turn to x and computer to o
+  $("#turno").click(function() {
+    $(".startgame").css("display","none")
+    turn = "O";
+    computer = "X";
+    reset();
+  });
+
+  $(".tic").click(function() {
+    var slot = $(this).attr("id");
+    playerTurn(turn,slot);
+  });
+  
+  
+  function playerTurn(turn,id){
+    var spotTaken=turns[id];
+    console.log(spotTaken);
+    if(!isNaN(spotTaken)){
+      turns[id]=turn; 
+      console.log(turns);
+      $("#"+id).text(turn);
+      $("#"+id).css("color","black");
+      checkDraw=emptyIndexies(turns);
+      if (checkDraw.length === 0) {show(0)} 
+      if (winCondition(turns,turn)) {show(turn)}
+      else {
+        var bestSpot = computersMove(turns,computer);
+        $("#"+bestSpot.index).text(computer);
+        $("#"+bestSpot.index).css("color","black");
+        turns[bestSpot.index]=computer;
+        console.log("index: " + bestSpot.index);
+        console.log("function calls: " + fc);
+        if(winCondition(turns,computer)) {show(computer)};
+      }
+    }
+  }
+  //computer's move function
+  function computersMove(newBoard,player){
+  //keep track of function calls;
+  fc++;
+
+  //available spots
+  var availSpots = emptyIndexies(newBoard);
+
+  // checks for the terminal states such as win, lose, and tie and returning a value accordingly
+  if (winCondition(newBoard, turn)){
+     return {score:-10};
+  }
+	else if (winCondition(newBoard, computer)){
+    return {score:10};
+	}
+  else if (availSpots.length === 0){
+  	return {score:0};
+  }
+
+// an array to collect all the objects
+  var moves = [];
+
+  // loop through available spots
+  for (var i = 0; i < availSpots.length; i++){
+    //create an object for each and store the index of that spot that was stored as a number in the object's index key
+    var move = {};
+  	move.index = newBoard[availSpots[i]];
+
+    // set the empty spot to the current player
+    newBoard[availSpots[i]] = player;
+
+    //if collect the score resulted from calling minimax on the opponent of the current player
+    if (player == computer){
+      var result = computersMove(newBoard, turn);
+      move.score = result.score;
+    }
+    else{
+      var result = computersMove(newBoard, computer);
+      move.score = result.score;
+    }
+
+    //reset the spot to empty
+    newBoard[availSpots[i]] = move.index;
+
+    // push the object to the array
+    moves.push(move);
+  }
+
+// if it is the computer's turn loop over the moves and choose the move with the highest score
+  var bestMove;
+  if(player === computer){
+    var bestScore = -10000;
+    for(var i = 0; i < moves.length; i++){
+      if(moves[i].score > bestScore){
+        bestScore = moves[i].score;
+        bestMove = i;
+      }
+    }
+  }else{
+
+// else loop over the moves and choose the move with the lowest score
+    var bestScore = 10000;
+    for(var i = 0; i < moves.length; i++){
+      if(moves[i].score < bestScore){
+        bestScore = moves[i].score;
+        bestMove = i;
+      }
+    }
+  }
+
+// return the chosen move (object) from the array to the higher depth
+  return moves[bestMove];
+} 
+  
+  
+  function emptyIndexies(board){
+  return  board.filter(s => s != "O" && s != "X");
+}
+  
+  function reset(){
+    turns=[0,1,2,3,4,5,6,7,8];
+    count=0;
+    $(".tic").css("color","#F0D41F");
+    $(".human").text(turnWon);
+    $(".computer").text(computerWon);
+  }
+  
+  //function to check if there is a winner
+  function winCondition(board, player){
+ if (
+        (board[0] == player && board[1] == player && board[2] == player) ||
+        (board[3] == player && board[4] == player && board[5] == player) ||
+        (board[6] == player && board[7] == player && board[8] == player) ||
+        (board[0] == player && board[3] == player && board[6] == player) ||
+        (board[1] == player && board[4] == player && board[7] == player) ||
+        (board[2] == player && board[5] == player && board[8] == player) ||
+        (board[0] == player && board[4] == player && board[8] == player) ||
+        (board[2] == player && board[4] == player && board[6] == player)
+        ) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+  //show the winner
+  function show(player){
+    $(".endgame").css("display","block");
+    if (player===0) {
+      $(".text").text("It's a draw!")
+    }
+    else{
+      $(".text").text("The winner is: "+player)
+      if (player===computer){computerWon++}
+      else if(player===turn){turnWon++}
+    }
+  }
+  
+   $(".replay").click(function() {
+    reset();
+     $(".endgame").css("display","none");
+     $(".startgame").css("display","block");
+  });
+});
+  </script>
+</body>
+</html>
